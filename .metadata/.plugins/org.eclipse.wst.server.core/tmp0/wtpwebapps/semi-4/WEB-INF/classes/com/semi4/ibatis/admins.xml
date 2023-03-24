@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="admin">
+	
+	<!-- 아이디로 관리자 조회하기 -->
+	<select id="getAdminById" parameterClass="string" resultClass="Admin">
+		select
+			ADMIN_ID			as id,
+			ADMIN_PASSWORD		as password,
+			ADMIN_NAME			as name,
+			ADMIN_GRADE			as grade
+		from
+			admins
+		where
+			admin_id = #value#
+	</select>
+	
+	<!-- 관리자 생성하기 -->
+	<insert id="insertAdmin" parameterClass="Admin">
+		insert into admins
+		(admin_id, admin_password, admin_name, admin_grade)
+		values 
+		(#id#, #password#, #name#, #grade#)
+	</insert>      
+	
+	<!-- 모든 관리자 조회하기 -->
+	<select id="getAllAdmins" resultClass="Admin">
+		select
+			ADMIN_ID			as id,
+			ADMIN_PASSWORD		as password,
+			ADMIN_NAME			as name,
+			ADMIN_GRADE			as grade
+		from
+			admins
+	</select>
+	
+	<!-- 입력받은 관리자 객체로 관리자 정보 수정하기 -->
+	<update id="updateAdmin" parameterClass="Admin">
+		update
+			admins
+		set
+			admin_password 	= #password#,
+			admin_name 		= #name#,
+			admin_grade		= #grade#
+		where 
+			admin_id = #id#
+	</update>
+	
+	<!-- 관리자 계정 삭제하기 -->
+	<delete id="deleteAdminById" parameterClass="string">
+		delete from
+			admins
+		where 
+			admin_id = #value#
+	</delete>
+	
+</sqlMap>

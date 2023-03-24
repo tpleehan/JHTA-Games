@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="notice">	
+
+	<!-- 공지사항 번호로 공지사항 조회하기 -->
+	<select id="getNoticeByNo" parameterClass="int" resultClass="NoticeBoard">
+		select
+			a.notice_board_no					as no,
+			a.notice_board_title				as title,
+			a.notice_board_contents				as content,
+			a.notice_board_create_date			as createDate,
+			a.notice_board_count				as count,
+			a.admin_id							as "admin.id",
+			b.admin_name						as "admin.name"
+		from
+			notice_boards a, admins b
+		where
+			a.admin_id = b.admin_id
+		and
+			a.notice_board_no = #value#
+	</select>
+	
+	<select id="getAllNotice" resultClass="NoticeBoard">
+		select
+			a.notice_board_no					as no,
+			a.notice_board_title				as title,
+			a.notice_board_contents				as content,
+			a.notice_board_create_date			as createDate,
+			a.notice_board_count				as count,
+			a.admin_id							as "admin.id",
+			b.admin_name						as "admin.name"
+		from
+			notice_boards a, admins b
+		where
+			a.admin_id = b.admin_id
+		order by
+			a.notice_board_no desc
+	</select>
+	
+	<!-- 새로운 공지사항 등록하기 -->
+	<insert id="insertNotice" parameterClass="NoticeBoard">
+		insert into notice_boards
+		(NOTICE_BOARD_NO, NOTICE_BOARD_TITLE, NOTICE_BOARD_CONTENTS, ADMIN_ID)
+		values 
+		(notice_board_no_seq.nextval, #title#, #content#, #admin.id#)
+	</insert>
+	
+	<!-- 최근 5개 공지사항 조회하기  -->
+	<select id="getNoticeByDate" resultClass="NoticeBoard">
+		select
+			rn,
+			notice_board_no				as no,
+			notice_board_title			as title,
+			notice_board_contents		as content,
+			notice_board_create_date	as createDate,
+			notice_board_count			as count,
+			admin_id					as "admin.id"
+		from ( select
+				row_number() over(order by notice_board_create_date desc)rn,
+				notice_board_no,
+				notice_board_title,
+				notice_board_contents,
+				notice_board_create_date,
+				notice_board_count,
+				admin_id
+			 from 
+				notice_boards)
+		where
+			rn &lt;= 5
+	</select>
+	
+	<select id="getNoticeBoardBySearchCount" parameterClass="map" resultClass="int">
+		select
+			count(*)
+		from
+			notice_boards a, admins b
+		where	
+			a.admin_id = b.admin_id
+			<dynamic>
+				<isNotNull property="type">
+					<isEqual property="type" compareValue="title">
+						and a.notice_board_title like '%' || #keyword# || '%'
+					</isEqual>
+					<isEqual property="type" compareValue="writer">
+						and b.admin_name like '%' || #keyword# || '%'
+					</isEqual>
+				</isNotNull>
+			</dynamic>
+	</select>
+	
+	<select id="getNoticeBoardBySearch" parameterClass="map" resultClass="NoticeBoard">
+		select
+			rn,
+			notice_board_no				as no,
+			notice_board_title			as title,
+			notice_board_contents		as content,
+			notice_board_create_date	as createDate,
+			notice_board_count			as count,
+			admin_id					as "admin.id"
+		from
+			(
+				select
+					row_number() over (order by notice_board_no desc) rn,
+					a.notice_board_no,
+					a.notice_board_title,
+					a.notice_board_contents,
+					a.notice_board_create_date,
+					a.notice_board_count,
+					a.admin_id,
+					b.admin_name
+				from
+					notice_boards a, admins b
+				where
+					a.admin_id = b.admin_id
+					<dynamic>
+						<isNotNull property="type">
+							<isEqual property="type" compareValue="title">
+								and a.notice_board_title like '%' || #keyword# || '%'
+							</isEqual>
+							<isEqual property="type" compareValue="writer">
+								and b.admin_name like '%' || #keyword# || '%'
+							</isEqual>
+						</isNotNull>
+					</dynamic>
+			) 		
+		where
+			rn >= #begin# and rn &lt;= #end#
+	</select>	
+	
+	<!-- 공지사항 조회수 증가시키기 -->
+	<update id="updateNoticeCountByNo" parameterClass="NoticeBoard">
+		update 
+			notice_boards
+		set
+			notice_board_count = #count#
+		where
+			notice_board_no = #no#
+	</update>
+	
+	<!-- 공지사항 제목, 내용 수정하기 -->
+	<update id="updateNotice" parameterClass="NoticeBoard">
+		update 
+			notice_boards
+		set
+			notice_board_title = #title#,
+			notice_board_contents = #content#
+		where
+			notice_board_no = #no#
+	</update>
+	
+	<!-- 공지사항 삭제하기 -->
+	<delete id="deleteNoticeByNo" parameterClass="int">
+		delete from
+			notice_boards
+		where 
+			notice_board_no = #value#
+	</delete>
+	
+</sqlMap>

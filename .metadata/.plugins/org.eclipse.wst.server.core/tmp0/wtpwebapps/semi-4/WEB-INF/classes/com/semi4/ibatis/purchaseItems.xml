@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="item">
+   
+   <select id="getOrderByOrderUser" parameterClass="map" resultClass="PurchaseItem">
+      select
+         rn,
+         purchase_no               as "purchase.no",
+         user_no                  as "purchase.user.no",
+         purchase_create_date      as "purchase.createDate",
+         purchase_total_price      as "purchase.totalPrice",
+         purchase_amount            as amount,
+         purchase_price            as price,
+         game_title               as "game.title"
+      from
+         (select
+            row_number() over (order by b.purchase_no desc) rn,
+            b.purchase_no,
+            b.user_no,
+            b.purchase_create_date,
+            b.purchase_total_price,
+            a.purchase_amount,
+            a.purchase_price,
+            c.game_title
+         from
+            purchase_items a, purchases b, games c
+         where
+            a.purchase_no = b.purchase_no
+         and a.game_no = c.game_no
+         and b.user_no = #un#)
+      where
+         rn >= #begin# and rn &lt;= #end#
+         
+   </select>
+   
+   <select id="countPurchaseItem" parameterClass="int" resultClass="int">
+      select
+         count(*)
+      from
+         purchases a, purchase_items b, games c
+      where
+         a.purchase_no = b.purchase_no
+      and
+         b.game_no = c.game_no
+      and 
+         user_no = #un#
+   </select>
+   
+   <!-- 구매번호에 해당하는 구매상품내역 조회하기 -->
+   <select id="getPurchasesByPurchaseNo" parameterClass="int" resultClass="PurchaseItem">
+      select 
+         PURCHASE_NO            as "purchase.no",
+         GAME_NO               as "game.no",
+         PURCHASE_AMOUNT         as amount,
+         PURCHASE_PRICE         as price
+      from
+         purchase_items
+      where
+         purchase_no = #value#
+   </select>
+
+   <!-- 전체구매상품내역 조회하기 + 상품명 -->
+   <select id="getAllPurchasesItems" resultClass="PurchaseItem">
+      select
+         A.purchase_no            as "purchase.no",
+         A.game_no               as "game.no",
+         A.purchase_amount         as amount,
+         A.purchase_price         as price,
+         B.game_title            as "game.title"
+      from
+         purchase_items A, games B
+      where
+         A.game_no = B.game_no
+   </select>
+   
+   <!-- 구매상품내역 조회하기(주문번호) -->
+   <select id="getPurchasesItemsByUserNo" parameterClass="int" resultClass="PurchaseItem">
+      select
+         A.purchase_no            as "purchase.no",
+         A.game_no               as "game.no",
+         A.purchase_amount         as amount,
+         A.purchase_price         as price,
+         B.user_no               as "user.no"
+      from
+         purchase_items A, purchases B
+      where    
+         A.purchase_no = B.purchase_no
+         and user_no = #value#
+   </select>
+         
+   <!-- 구매상품내역 추가하기 -->
+   <insert id="insertPurchaseItem" parameterClass="PurchaseItem">
+      insert into purchase_items   
+      (purchase_no, game_no, purchase_amount, purchase_price)
+      values
+      (#purchase.no#, #game.no#, #amount#, #price#)
+   </insert>
+   
+   <!-- 게임번호에 해당하는 구매상품 내역 삭제하기 -->
+	<delete id="deletePurchaseItemByGameNo" parameterClass="int">
+		delete from
+			purchase_items
+		where 
+			game_no = #value#
+	</delete>
+   
+   
+</sqlMap>

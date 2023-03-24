@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE sqlMap
+        PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="comment">
+
+    <insert id="insertComment" parameterClass="Comment">
+        insert into comments
+            (comment_no, comment_contents, review_board_no, user_no)
+        values (comment_no_seq.nextval, #content#, #reviewBoard.no#, #user.no#)
+    </insert>
+
+    <select id="getCommentByNo" parameterClass="int" resultClass="Comment">
+        select a.comment_no as no,
+		a.comment_contents		as content,
+		a.review_board_no		as "reviewBoard.no",
+		a.user_no				as "user.no",
+		b.user_name				as "user.name"
+        from
+            comments a, users b
+        where
+            a.user_no = b.user_no
+          and
+            comment_no = #value#
+    </select>
+
+    <select id="getCommentByReviewNo" parameterClass="int" resultClass="Comment">
+        select a.comment_no as no,
+		a.comment_contents		as content,
+		a.review_board_no		as "reviewBoard.no",
+		a.user_no				as "user.no",
+		b.user_name				as "user.name"
+        from
+            comments a, users b
+        where
+            a.user_no = b.user_no
+          and
+            review_board_no = #value#
+        order by
+            a.comment_no desc
+    </select>
+
+    <select id="getAllComment" resultClass="Comment">
+        select a.comment_no as no,
+		a.comment_contents		as content,
+		a.review_board_no		as "reviewBoard.no",
+		a.user_no				as "user.no",
+		b.user_name				as "user.name"
+        from
+            comments a, users b
+        where
+            a.user_no = b.user_no
+    </select>
+
+    <update id="updateComment" parameterClass="Comment">
+        update
+            comments
+        set comment_contents = #content#
+        where comment_no = #no#
+    </update>
+
+    <delete id="deleteComment" parameterClass="int">
+        delete
+        from comments
+        where comment_no = #value#
+    </delete>
+
+</sqlMap>

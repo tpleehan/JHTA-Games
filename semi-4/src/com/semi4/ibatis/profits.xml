@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE sqlMap
+        PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="profit">
+    <!-- 해당 날짜에 해당하는 수익 조회하기 -->
+    <select id="getProfitsByDate" parameterClass="string" resultClass="Profit">
+        select PROFIT_DATE  as profitDate,
+               GENRE_NO     as "genre.no",
+               PUBLISHER_NO as "publisher.no",
+               PROFIT_SALES as sales
+        from profits
+        where to_char(profit_date, 'yyyy-mm-dd') = #value#
+    </select>
+
+    <!-- 선택한 달에 해당하는 수익 조회하기 -->
+    <select id="getProfitsByMonth" parameterClass="string" resultClass="Profit">
+        select PROFIT_DATE  as profitDate,
+               GENRE_NO     as "genre.no",
+               PUBLISHER_NO as "publisher.no",
+               PROFIT_SALES as sales
+        from profits
+        where to_char(profit_date, 'yyyy-mm') = #value#
+    </select>
+
+    <!-- 새로운 수익 정보 생성하기 -->
+    <insert id="insertProfits" parameterClass="Profit">
+        insert into profits
+            (GENRE_NO, PUBLISHER_NO, PROFIT_SALES)
+        values (#genre.no#, #publisher.no#, #sales#)
+    </insert>
+
+    <!-- 선택한 장르의 수익 조회하기 -->
+    <select id="getTotalProfitByGenre" parameterClass="int" resultClass="int">
+        select nvl(sum(profit_sales), 0)
+        from profits
+        where genre_no = #value#
+    </select>
+
+</sqlMap>

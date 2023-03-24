@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="like">
+
+<insert id="insertlikes" parameterClass="Like">
+	insert into likes
+		(review_board_no, user_no)
+	values
+		(#reviewBoard.no#, #user.no#)
+</insert>
+	
+<select id="getlikeByNo" parameterClass="int" resultClass="Like">
+	select
+		review_board_no		as "reviewBoard.no",
+		user_no				as "user.no"
+	from
+		likes
+	where
+		review_board_no = #value#
+</select>	
+	
+<select id="getLikeCountByNo" parameterClass="int" resultClass="int">	
+	select
+		count(*)
+	from
+		likes
+	where
+		review_board_no = #value#
+</select>
+
+<select id="getlikeByNoes" parameterClass="Like" resultClass="int">
+	select
+		count(*)
+	from
+		likes
+	where
+		review_board_no = #reviewBoard.no#
+	and
+		user_no = #user.no#
+</select>
+     
+<delete id="deletelikes" parameterClass="int">
+	delete from 
+		likes
+	where
+		review_board_no = #value#
+</delete> 
+</sqlMap>

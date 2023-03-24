@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE sqlMap
+        PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="gamelike">
+
+    <insert id="insertGameLikes" parameterClass="GameLike">
+        insert into game_likes
+            (user_no, game_no)
+        values (#user.no#, #game.no#)
+    </insert>
+
+    <select id="selectGameLikeByGameNo" parameterClass="int" resultClass="GameLike">
+        select user_no as "user.no",
+               game_no as "game.no"
+        from game_likes
+        where game_no = #value#
+    </select>
+
+    <select id="selectGameLikeCntByNo" parameterClass="GameLike" resultClass="int">
+        select count(*)
+        from game_likes
+        where user_no = #user.no#
+          and game_no = #game.no#
+    </select>
+
+    <delete id="deleteGameLikes" parameterClass="GameLike">
+        delete
+        from game_likes
+        where game_no = #game.no#
+          and user_no = #user.no#
+    </delete>
+
+</sqlMap>

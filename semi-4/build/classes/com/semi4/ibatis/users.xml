@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="user">
+	
+	<!-- 회원가입 기능 -->
+	<insert id="insertUser" parameterClass="User">
+		insert into users
+		(user_no, user_id, user_password, user_name, user_tel, user_email)
+		values
+		(user_no_seq.nextval, #id#, #password#, #name#, #tel#, #email#)
+	</insert>
+
+ 
+ 	<!-- 개인정보 변경기능 (비밀번호) -->
+	<update id="updateUserChagePwd" parameterClass="User">
+		update
+			users
+		set
+			user_password = #password#
+		where
+			user_no = #no#
+	</update>
+
+ 	
+ 	<!-- 회원탈퇴 기능 (enabled의 default 값을 'y'에서 'n'로 변경한다.)  -->
+	<update id="dropOutUser" parameterClass="int">
+		update
+			users
+		set
+			user_enabled = 'N'
+		where
+			user_no = #value#
+	</update>
+
+	
+	<!-- 고객 아이디를 조회하는 기능 -->
+	<select id="getUserById" parameterClass="string" resultClass="User">
+		select
+			user_no               as no,
+	        user_id               as id,
+	        user_password         as password,
+	        user_name             as name,
+	        user_tel              as tel,
+	        user_email            as email,
+	        user_enabled          as enabled,
+	        user_create_date      as createDate
+	    from
+	        users
+	    where
+	        user_id = #value#    
+    </select>
+    
+    <!-- 고객번호로 고객 조회 -->
+    <select id="getUserByNo" parameterClass="int" resultClass="User"  > 
+    	select 
+    		user_no 			as no, 
+    		user_id 			as id, 
+    		user_password 		as password, 
+    		user_name 			as name, 
+    		user_tel 			as tel, 
+    		user_email 			as email, 
+    		user_enabled 		as enabled, 
+    		user_create_date 	as createDate 
+    	from 
+    		users 
+    	where 
+    		user_no = #value# 
+    </select>
+  
+   
+    
+</sqlMap>
