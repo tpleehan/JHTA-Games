@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE sqlMapConfig      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map Config 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-config-2.dtd">
+
+<sqlMapConfig>
+
+	<settings useStatementNamespaces="true" />
+	
+	<typeAlias alias="Admin" type="com.semi4.vo.Admin"/>
+    <typeAlias alias="Cart" type="com.semi4.vo.Cart"/>
+    <typeAlias alias="Comment" type="com.semi4.vo.Comment"/>
+    <typeAlias alias="Game" type="com.semi4.vo.Game"/>
+    <typeAlias alias="GameLike" type="com.semi4.vo.GameLike"/>
+	<typeAlias alias="GameImage" type="com.semi4.vo.GameImage"/>
+    <typeAlias alias="Genre" type="com.semi4.vo.Genre"/>
+    <typeAlias alias="Like" type="com.semi4.vo.Like"/>
+    <typeAlias alias="NoticeBoard" type="com.semi4.vo.NoticeBoard"/>
+    <typeAlias alias="Profit" type="com.semi4.vo.Profit"/>
+    <typeAlias alias="Publisher" type="com.semi4.vo.Publisher"/>
+    <typeAlias alias="PurchaseItem" type="com.semi4.vo.PurchaseItem"/>
+    <typeAlias alias="Purchase" type="com.semi4.vo.Purchase"/>
+    <typeAlias alias="QnaAnswer" type="com.semi4.vo.QnaAnswer"/>
+    <typeAlias alias="QnaBoard" type="com.semi4.vo.QnaBoard"/>
+    <typeAlias alias="ReviewBoard" type="com.semi4.vo.ReviewBoard"/>
+	<typeAlias alias="User" type="com.semi4.vo.User"/>
+	<typeAlias alias="ProfitResult" type="com.semi4.vo.ProfitResult"/>
+
+
+	<transactionManager type="JDBC" commitRequired="false">
+		<!-- Connection Pool 구성 정보를 설정한다. -->
+		<dataSource type="SIMPLE">
+			<property name="JDBC.Driver" value="oracle.jdbc.OracleDriver" />
+			<property name="JDBC.ConnectionURL" value="jdbc:oracle:thin:@192.168.10.11:1521:xe" />
+			<property name="JDBC.Username" value="team4" />
+			<property name="JDBC.Password" value="zxcv1234" />
+		</dataSource>
+	</transactionManager>
+
+
+	<!-- 객체와 SQL이 매핑된 매퍼파일을 등록한다. -->
+	<sqlMap resource="com/semi4/ibatis/admins.xml" />
+    <sqlMap resource="com/semi4/ibatis/carts.xml" />
+    <sqlMap resource="com/semi4/ibatis/comments.xml" />
+    <sqlMap resource="com/semi4/ibatis/games.xml" />
+    <sqlMap resource="com/semi4/ibatis/gameImages.xml" />
+    <sqlMap resource="com/semi4/ibatis/gamelikes.xml" />
+    <sqlMap resource="com/semi4/ibatis/genres.xml" />
+    <sqlMap resource="com/semi4/ibatis/likes.xml" />
+    <sqlMap resource="com/semi4/ibatis/noticeBoards.xml" />
+    <sqlMap resource="com/semi4/ibatis/profits.xml" />
+    <sqlMap resource="com/semi4/ibatis/publishers.xml" />
+    <sqlMap resource="com/semi4/ibatis/purchaseItems.xml" />
+    <sqlMap resource="com/semi4/ibatis/purchases.xml" />
+    <sqlMap resource="com/semi4/ibatis/qnaAnswers.xml" />
+    <sqlMap resource="com/semi4/ibatis/qnaBoards.xml" />
+    <sqlMap resource="com/semi4/ibatis/reviewBoards.xml" />
+    <sqlMap resource="com/semi4/ibatis/users.xml" />
+    <sqlMap resource="com/semi4/ibatis/profitResults.xml" />
+
+</sqlMapConfig>

@@ -1,0 +1,64 @@
+package com.semi4.dao;
+
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
+
+import com.ibatis.sqlmap.client.SqlMapClient;
+import com.semi4.utils.IbatisUtil;
+import com.semi4.vo.PurchaseItem;
+
+public class PurchaseItemDao {
+
+	// �̱��� ��ü
+	private static PurchaseItemDao self = new PurchaseItemDao();    // �ڱ� �ڽ��� ��ü�� ��� ���������� ��ü�� �����Ѵ�.
+	private PurchaseItemDao() {}							// �����ڸ� private���� ����
+	public static PurchaseItemDao getInstance() {			// UserDao ��ü�� �����ϴ� �����޼ҵ带 ����
+		return self;
+	} 
+		
+	private SqlMapClient sqlmap = IbatisUtil.getSqlmap();
+	
+	public int countPurchaseItem(int userNo) throws SQLException{
+		return (Integer) sqlmap.queryForObject("item.countPurchaseItem", userNo);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<PurchaseItem> getAllPurchasesItems() throws SQLException {
+		return sqlmap.queryForList("item.getAllPurchasesItems");
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<PurchaseItem> getPurchasesItemsByUserNo(int userNo) throws SQLException {
+		return sqlmap.queryForList("item.getPurchasesItemsByUserNo", userNo);
+	}
+	
+	public void insertPurchaseItem(PurchaseItem purchaseItem) throws SQLException {
+		sqlmap.insert("item.insertPurchaseItem", purchaseItem);
+	} 
+	
+	/**
+	 * 주문번호에 해당하는 주문물품내역 조회하기
+	 * @param purchaseNo
+	 * @return List<PurchaseItem>
+	 * @throws SQLException
+	 */
+	@SuppressWarnings("unchecked")
+	public List<PurchaseItem> getPurchasesByPurchaseNo(int purchaseNo) throws SQLException{
+		return sqlmap.queryForList("item.getPurchasesByPurchaseNo", purchaseNo);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<PurchaseItem> test(Map<String, Object> criteria) throws SQLException{
+		return sqlmap.queryForList("item.test", criteria);
+	}
+	
+	/**
+	 * 구매번호로 PurchaseItem 삭제하기
+	 * @param itemNo
+	 * @throws SQLException
+	 */
+	public void deletePurchaseItemByGameNo(int gameNo) throws SQLException{
+		sqlmap.delete("item.deletePurchaseItemByGameNo", gameNo);
+	}
+}

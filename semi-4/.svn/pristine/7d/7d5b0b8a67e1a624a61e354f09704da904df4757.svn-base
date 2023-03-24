@@ -1,0 +1,63 @@
+package com.semi4.dao;
+
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
+
+import com.ibatis.sqlmap.client.SqlMapClient;
+import com.semi4.utils.IbatisUtil;
+import com.semi4.vo.ReviewBoard;
+
+public class ReviewBoardDao {
+
+		private static ReviewBoardDao self = new ReviewBoardDao();    // �ڱ� �ڽ��� ��ü�� ��� ���������� ��ü�� �����Ѵ�.
+		private ReviewBoardDao() {}							// �����ڸ� private���� ����
+		public static ReviewBoardDao getInstance() {			// UserDao ��ü�� �����ϴ� �����޼ҵ带 ����
+		return self;
+		} 
+		
+		private SqlMapClient sqlmap = IbatisUtil.getSqlmap();
+		
+		public void insertReview(ReviewBoard board) throws SQLException{
+			sqlmap.insert("review.insertReview", board);
+		}
+		
+		@SuppressWarnings("unchecked")
+		public List<ReviewBoard> getAllReviewBoard() throws SQLException{
+			return sqlmap.queryForList("review.getAllReviewBoard");
+		}
+		
+		public ReviewBoard getReviewBoardByNo(int reviewNo) throws SQLException{
+			return (ReviewBoard) sqlmap.queryForObject("review.getReviewBoardByNo", reviewNo);
+		}
+		
+		public void updatereviewcount(ReviewBoard reviewBoard) throws SQLException{
+			sqlmap.update("review.updatereviewcount", reviewBoard);
+		}
+		
+		public void updateReviewboard(ReviewBoard reviewBoard) throws SQLException{
+			sqlmap.update("review.updateReviewboard", reviewBoard);
+		}
+		
+		public void updateReviewboardlike(ReviewBoard reviewBoard) throws SQLException{
+			sqlmap.update("review.updateReviewboardlike", reviewBoard);
+		}
+		
+		@SuppressWarnings("unchecked")
+		public List<ReviewBoard> getReviewBoardByDynamic(Map<String, Object> criteria) throws SQLException{
+			return sqlmap.queryForList("review.getReviewBoardByDynamic", criteria);
+		}
+		
+		public Integer countReviewBoard(Map<String, Object> criteria) throws SQLException{
+			return (Integer) sqlmap.queryForObject("review.countReviewBoard", criteria);
+		}
+		
+		public void deleteReviewboard(int reviewNo) throws SQLException{
+			sqlmap.delete("review.deleteReviewboard", reviewNo);
+		}
+		
+		@SuppressWarnings("unchecked")
+		public List<ReviewBoard> getReviewsByUserNo(int userNo) throws SQLException {
+			return sqlmap.queryForList("review.getReviewsByUserNo", userNo);
+		}
+}

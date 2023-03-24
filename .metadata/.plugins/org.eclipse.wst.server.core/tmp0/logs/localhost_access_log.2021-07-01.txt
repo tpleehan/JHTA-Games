@@ -1,4 +1,0 @@
-0:0:0:0:0:0:0:1 - - [01/Jul/2021:00:00:09 +0900] "GET /semi-4/loginform.jsp HTTP/1.1" 200 10030
-0:0:0:0:0:0:0:1 - - [01/Jul/2021:00:00:12 +0900] "GET /semi-4/user/registerform.jsp HTTP/1.1" 200 43628
-0:0:0:0:0:0:0:1 - - [01/Jul/2021:00:03:13 +0900] "GET /semi-4/home.jsp HTTP/1.1" 200 57240
-0:0:0:0:0:0:0:1 - - [01/Jul/2021:00:03:28 +0900] "GET /semi-4/resources/images/gameImages/rainbowsix.jpg HTTP/1.1" 200 111839

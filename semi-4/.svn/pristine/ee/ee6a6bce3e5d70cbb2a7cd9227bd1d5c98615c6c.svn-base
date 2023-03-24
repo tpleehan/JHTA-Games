@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="game">
+
+	<!-- 새로 등록할 게임 번호 시퀀스 조회하기 -->
+	<select id="getNewGameNo" resultClass="int">
+		select 
+			game_no_seq.nextval
+		from 
+			dual
+	</select>
+
+	<!-- 새로운 게임 등록하기 -->
+	<insert id="insertNewGame" parameterClass="Game">
+		insert into games
+		(GAME_NO, GAME_TITLE, GAME_PRICE, GAME_DISCOUNT_PRICE, GAME_CREATE_DATE, GENRE_NO,
+		 PUBLISHER_NO, GAME_IMAGE, GAME_INTRO, GAME_REQUIRE)
+		values
+		(#no#, #title#, #price#, #discountPrice#, #createDate#, #genre.no#, 
+		 #publisher.no#, #imageFileName#, #intro#, #require#)
+	</insert>
+	
+	<!-- 
+		검색조건을 만족하는 행의 갯수를 반환한다.
+		검색조건이 없는 경우 전체 행의 갯수를 반환한다.
+		dynamic 쿼리에서는 searchOpt값이 존재하는 경우 검색조건이 있는 것으로 판단한다.
+	 -->
+	<select id="searchGamesCount" parameterClass="map" resultClass="int">
+		select
+			count(*)
+		from 
+			games
+		where 
+			1 = 1
+		<dynamic>
+			<isNotNull property="genre">
+				and genre_no = #genre#  	
+			</isNotNull>
+			<isNotNull property="publisher">
+				and publisher_no = #publisher#
+			</isNotNull>			
+		</dynamic>	
+	</select>
+	
+	<select id="searchGames" parameterClass="map" resultClass="Game">
+	select
+		rn,
+		game_no					as no,
+		game_title 				as title,
+		game_price				as price,
+		game_discount_price		as discountPrice,
+		game_create_date		as createDate,
+		genre_no				as "genre.no",
+		publisher_no			as "publisher.no",
+		game_image				as imageFileName,
+		game_intro				as intro,
+		game_require			as require,
+		game_like_counts		as likeCount
+	from ( select
+			row_number() over (order by 
+			<dynamic>
+				<isEqual property="sort" compareValue="opendate">game_create_date desc</isEqual>
+				<isEqual property="sort" compareValue="priceup">game_price asc</isEqual>
+				<isEqual property="sort" compareValue="pricedown">game_price desc</isEqual>
+			</dynamic>
+			) rn,
+			game_no,
+			game_title,
+			game_price,
+			game_discount_price,
+			game_create_date,
+			genre_no,
+			publisher_no,
+			game_image,
+			game_intro,
+			game_require,
+			game_like_counts	
+		from
+			games
+		where 
+			1 = 1
+		<dynamic>
+			<isNotNull property="genre">
+				and genre_no =  #genre#  	
+			</isNotNull>
+			<isNotNull property="publisher">
+				and publisher_no = #publisher#
+			</isNotNull>			
+		</dynamic>	
+		 )
+	where
+		rn >= #begin# and rn &lt;= #end#
+	</select>
+	
+	<select id="getGamesCount" resultClass="int">
+		select
+			count(*)
+		from
+			games
+		where
+			game_create_date >= (sysdate - 60)
+	</select>
+	
+	<!-- 다음부터는 별칭을 안이 아닌 밖에다가 하기  -->
+	<select id="getAllGamesByDate" parameterClass="map" resultClass="Game">
+		select
+			no,
+			title,
+			price,
+			discountPrice,
+			"genre.no",
+			"publisher.no"
+		from (select
+					row_number() over (order by game_create_date desc) rn,
+					game_no					as no,
+					game_title				as title,
+					game_price				as price,
+					game_discount_price		as discountPrice,
+					GENRE_NO          		as "genre.no",
+			        PUBLISHER_NO      	    as "publisher.no",
+			        GAME_IMAGE         	    as imageFileName,
+			        GAME_INTRO         	    as intro,
+			        GAME_REQUIRE       	  	as require
+				from
+					games
+				where
+					game_create_date >= (sysdate - 60))
+		where rn >= #begin# and rn &lt;= #end#
+	</select>
+	
+	<select id="getMainGamesByDate" resultClass="Game">
+		select
+			no,
+			title,
+			price,
+			discountPrice,
+			"genre.no",
+			"publisher.no",
+			imageFileName,
+			createDate 
+		from (select
+					row_number() over (order by game_create_date desc) rn,
+					game_no					as no,
+					game_title				as title,
+					game_price				as price,
+					game_discount_price		as discountPrice,
+					GENRE_NO          		as "genre.no",
+			        PUBLISHER_NO      	    as "publisher.no",
+			        GAME_IMAGE         	    as imageFileName,
+			        GAME_INTRO         	    as intro,
+			        GAME_REQUIRE       	  	as require,
+			        game_create_date		as createDate
+				from
+					games)
+		where rn &lt;= 9
+	</select>
+	
+	<select id="getMainGamesByAtoZ" resultClass="Game">
+		select
+			no,
+			title,
+			price,
+			discountPrice,
+			"genre.no",
+			"publisher.no",
+			imageFileName,
+			createDate,
+			likeCount 
+		from (select
+					row_number() over (order by game_title asc) rn,
+					game_no					as no,
+					game_title				as title,
+					game_price				as price,
+					game_discount_price		as discountPrice,
+					GENRE_NO          		as "genre.no",
+			        PUBLISHER_NO      	    as "publisher.no",
+			        GAME_IMAGE         	    as imageFileName,
+			        GAME_INTRO         	    as intro,
+			        GAME_REQUIRE       	  	as require,
+			        game_create_date		as createDate,
+			        game_like_counts		as likeCount
+				from
+					games)
+		where rn &lt;= 9
+	</select>
+	
+	<!-- 모든 게임 조회하기 -->
+		<select id="getAllGames" resultClass="Game">
+			select
+				GAME_NO					as no,
+				GAME_TITLE				as title,
+				GAME_PRICE				as price,
+				GAME_DISCOUNT_PRICE		as discountPrice,
+				GAME_CREATE_DATE		as createDate,
+				GENRE_NO				as "genre.no",
+				PUBLISHER_NO			as "publisher.no",
+				GAME_IMAGE				as imageFileName,
+				GAME_INTRO				as intro,
+				GAME_REQUIRE			as require,
+				game_like_counts		as likeCount
+			from
+				games
+		</select>
+		
+	<!-- 이름으로 게임 조회 -->
+	<select id="getGameByTitle" parameterClass="string" resultClass="Game">
+		select
+			GAME_NO					as no,
+			GAME_TITLE				as title,
+			GAME_PRICE				as price,
+			GAME_DISCOUNT_PRICE		as discountPrice,
+			GAME_CREATE_DATE		as createDate,
+			GENRE_NO				as "genre.no",
+			PUBLISHER_NO			as "publisher.no",
+			GAME_IMAGE				as imageFileName,
+			GAME_INTRO				as intro,
+			GAME_REQUIRE			as require,
+			game_like_counts		as likeCount
+		from
+			games
+		where
+			game_title = #value#
+	</select>
+	
+	<!-- 번호로 게임 조회 -->
+	<select id="getGameByNo" parameterClass="int" resultClass="Game">
+		select
+			b.GAME_NO					as no,
+			b.GAME_TITLE				as title,
+			b.GAME_PRICE				as price,
+			b.GAME_DISCOUNT_PRICE		as discountPrice,
+			b.GAME_CREATE_DATE			as createDate,
+			b.GENRE_NO					as "genre.no",
+			b.PUBLISHER_NO				as "publisher.no",
+			b.GAME_IMAGE				as imageFileName,
+			b.GAME_INTRO				as intro,
+			b.GAME_REQUIRE				as require,
+				(select count(*)
+				from
+					game_likes a
+				where
+					a.game_no = b.game_no)	as likeCount
+		from
+			games b
+		where
+			game_no = #value#
+	</select>
+	
+	<!-- 게임 수정하기 -->
+	<update id="updateGame" parameterClass="Game">
+		update 
+			games
+		set
+			GAME_TITLE				= #title#,
+			GAME_PRICE				= #price#,
+			GAME_DISCOUNT_PRICE		= #discountPrice#,
+			GAME_CREATE_DATE		= #createDate#,
+			GENRE_NO				= #genre.no#,
+			PUBLISHER_NO			= #publisher.no#,
+			GAME_IMAGE				= #imageFileName#,
+			GAME_INTRO				= #intro#,
+			GAME_REQUIRE			= #require#
+		where
+			game_no = #no# 
+	</update>
+	
+	<!-- 게임번호로 게임 삭제하기 -->
+	<delete id="deleteGameByNo" parameterClass="int">
+		delete
+			from games
+		where
+			game_no = #value#
+	</delete>
+	
+	<!-- 빅키워드 스몰키워드로 게임 검색하기 -->
+	<select id="selectKeywordGames" parameterClass="map" resultClass="Game">
+		select	
+				GAME_NO					as no,
+				GAME_TITLE				as title,
+				GAME_PRICE				as price,
+				GAME_DISCOUNT_PRICE		as discountPrice,
+				GAME_CREATE_DATE		as createDate,
+				GENRE_NO				as "genre.no",
+				PUBLISHER_NO			as "publisher.no",
+				GAME_IMAGE				as imageFileName,
+				GAME_INTRO				as intro,
+				GAME_REQUIRE			as require,
+				game_like_counts		as likeCount
+		from (select
+				row_number() over (order by game_create_date desc) rn,
+				GAME_NO,
+				GAME_TITLE,
+				GAME_PRICE,
+				GAME_DISCOUNT_PRICE,
+				GAME_CREATE_DATE,
+				GENRE_NO,
+				PUBLISHER_NO,
+				GAME_IMAGE,
+				GAME_INTRO,
+				GAME_REQUIRE,
+				game_like_counts
+			from
+				games
+			where 1 = 1
+			<dynamic>
+				<isNotNull property="bigkeyword">
+					and game_title like '%' || #bigkeyword# || '%'
+				</isNotNull>
+				<isNotNull property="smallkeyword">
+					and game_title like '%' || #smallkeyword# || '%'
+				</isNotNull>
+			</dynamic>)
+		where
+			rn >= #begin# and rn &lt;= #end#			
+	</select>
+	
+	<!-- 빅키워드 스몰키워드로 게임수 검색하기 -->
+	<select id="selectKeywordGamesCount" parameterClass="map" resultClass="int">
+		select
+			count(*)
+		from
+			games
+		where 1 = 1
+		<dynamic>
+			<isNotNull property="bigkeyword">
+				and game_title like '%' || #bigkeyword# || '%'
+			</isNotNull>
+			<isNotNull property="smallkeyword">
+				and game_title like '%' || #smallkeyword# || '%'
+			</isNotNull>
+		</dynamic>	
+	</select>
+	
+</sqlMap>

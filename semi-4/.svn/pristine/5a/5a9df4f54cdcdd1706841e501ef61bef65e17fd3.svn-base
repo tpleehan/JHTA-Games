@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="review">
+
+<insert id="insertReview" parameterClass="ReviewBoard">
+	insert into review_boards
+		(review_board_no, review_board_title, review_board_contents, user_no, purchase_no)
+	values
+		(review_board_no_seq.nextval, #title#, #content#, #user.no#, #purchase.no#)
+</insert>
+
+<select id="countReviewBoard" parameterClass="map" resultClass="int">
+	select
+		count(*)
+	from
+		review_boards a, users b
+	where
+		a.user_no = b.user_no
+		<dynamic>
+			<isNotNull property="type">
+				<isEqual property="type" compareValue="title">
+					and a.review_board_title like '%' || #keyword# || '%'
+				</isEqual>
+				<isEqual property="type" compareValue="writer">
+					and b.user_name like '%' || #keyword# || '%'
+				</isEqual>
+				<isEqual property="type" compareValue="content">
+					and a.review_board_content like '%' || #keyword# || '%'
+				</isEqual>
+			</isNotNull>
+		</dynamic>
+</select>
+
+<select id="getReviewBoardByDynamic" parameterClass="map" resultClass="ReviewBoard">
+	select
+		rn,
+		X.review_board_no				as no,		
+		X.review_board_title			as title,
+		X.review_board_create_date	as createDate,	
+		X.review_board_contents		as content,	
+		X.review_count				as count,
+		X.review_board_like_count		as likeCount,
+		X.user_no						as "user.no",
+		X.user_name					as "user.name",	
+		X.purchase_no					as "purchase.no",
+		(
+			select
+				count(*)
+			from
+				comments A
+			where
+				A.review_board_no = X.review_board_no
+		)								as commentCount
+	from
+		(select
+			row_number() over (order by 
+				<dynamic>					
+					<isEqual property="sort" compareValue="date">
+						review_board_create_date desc
+					</isEqual>
+					<isEqual property="sort" compareValue="count">
+						review_count desc
+					</isEqual>
+					<isEqual property="sort" compareValue="like">
+						review_board_like_count desc
+					</isEqual>
+					<isEqual property="sort" compareValue="comment">
+						review_board_comment_count desc
+					</isEqual>					
+				</dynamic>
+			) rn,
+			a.review_board_no,					
+			a.review_board_title,			
+			a.review_board_create_date,		
+			a.review_board_contents,			
+			a.review_count,					
+			a.review_comment_count,			
+			a.review_board_like_count,		
+			a.user_no,						
+			b.user_name,						
+			a.purchase_no					
+		from
+			review_boards a, users b
+		where
+			a.user_no = b.user_no
+			<dynamic>
+				<isNotNull property="type">
+					<isEqual property="type" compareValue="title">
+						and a.review_board_title like '%' || #keyword# || '%'
+					</isEqual>
+					<isEqual property="type" compareValue="writer">
+						and b.user_name like '%' || #keyword# || '%'
+					</isEqual>
+					<isEqual property="type" compareValue="content">
+						and a.review_board_contents like '%' || #keyword# || '%'
+					</isEqual>
+				</isNotNull>
+			</dynamic>) X
+		where
+				rn >= #begin# and rn &lt;= #end#
+</select>
+	
+<select id="getAllReviewBoard" resultClass="ReviewBoard">
+	select
+		a.review_board_no				as no,	
+		a.review_board_title			as title,
+		a.review_board_create_date		as createDate,
+		a.review_board_contents			as content,
+		a.review_count					as count,
+		a.review_comment_count			as commentCount,
+		a.review_board_like_count		as likeCount,
+		a.user_no						as "user.no",
+		b.user_name						as "user.name",
+		a.purchase_no					as "purchase.no"
+	from
+		review_boards a, users b
+	where
+		a.user_no = b.user_no
+</select>
+
+<select id="getReviewBoardByNo" parameterClass="int" resultClass="ReviewBoard">
+	select
+		a.review_board_no					as no,
+		a.review_board_title				as title,
+		a.review_board_create_date			as createDate,
+		a.review_board_contents				as content,
+		a.review_count						as count,
+		a.review_comment_count				as commentCount,
+		a.review_board_like_count			as likeCount,
+		a.user_no							as "user.no",
+		a.purchase_no						as "purchase.no",
+		b.user_name							as "user.name"
+	from
+		review_boards a, users b
+	where
+		a.user_no = b.user_no
+	and
+		review_board_no = #no#
+	order by
+		review_board_no desc
+</select>
+
+<update id="updatereviewcount" parameterClass="ReviewBoard">
+	update
+		review_boards
+	set
+		review_count = #count#
+	where
+		review_board_no = #no#
+</update>
+
+<update id="updateReviewboardlike" parameterClass="ReviewBoard">
+	update
+		review_boards
+	set
+		review_board_like_count = #likeCount#
+	where
+		review_board_no = #no#
+</update>
+
+<update id="updateReviewboard" parameterClass="ReviewBoard">
+	update
+		review_boards
+	set
+		review_board_title = #title#,
+		review_board_contents = #content#
+	where
+		review_board_no = #no#
+</update>
+     
+<delete id="deleteReviewboard" parameterClass="int">
+	delete from
+		review_boards
+	where
+		review_board_no = #value#
+</delete> 
+
+<!-- 리뷰게시판에 글을 쓴 유저를 조회하는 기능 -->
+<select id="getReviewsByUserNo" parameterClass="int" resultClass="ReviewBoard">
+	select
+		review_board_no					as no,
+		review_board_title				as title,
+		review_board_contents			as content,
+		review_board_create_date		as createDate,
+		review_count					as count,
+		review_comment_count			as commentCount,
+		review_board_like_count			as likeCount,
+		user_no							as "user.no",
+		purchase_no						as "purchase.no"
+	from
+		review_boards
+	where
+		user_no = #value#
+		
+</select>
+
+</sqlMap>
