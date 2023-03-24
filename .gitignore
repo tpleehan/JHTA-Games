@@ -18,6 +18,12 @@ local.properties
 .loadpath
 .recommenders
 
+### SVN ###
+.svn/
+
+### Servers ###
+Servers/
+
 ### STS ###
 .apt_generated
 .classpath
